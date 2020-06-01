@@ -2,6 +2,7 @@ import dateFormat from 'dateformat'
 import { History } from 'history'
 import update from 'immutability-helper'
 import * as React from 'react'
+import moment from 'moment'
 import {
   Button,
   Checkbox,
@@ -26,6 +27,7 @@ interface TodosProps {
 interface TodosState {
   todos: Todo[]
   newTodoName: string
+  newDueDate: string
   loadingTodos: boolean
 }
 
@@ -33,7 +35,12 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
   state: TodosState = {
     todos: [],
     newTodoName: '',
+    newDueDate: '',
     loadingTodos: true
+  }
+
+  handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({ newDueDate: event.target.value })
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +53,17 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
-      const dueDate = this.calculateDueDate()
+      let dueDate = this.calculateDueDate()
+      if(this.state.newDueDate != '') {
+        if(!moment(this.state.newDueDate, 'YYYY-MM-DD').isValid()) {
+          throw new Error('Invalid date.')
+        }
+        dueDate = this.state.newDueDate
+      }
+
+      if(this.state.newTodoName === '') {
+        throw new Error('No name.')
+      }      
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate
@@ -55,8 +72,8 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         todos: [...this.state.todos, newTodo],
         newTodoName: ''
       })
-    } catch {
-      alert('Todo creation failed')
+    } catch(err) {
+      alert('Todo creation failed: ' + err.message)
     }
   }
 
@@ -115,26 +132,32 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
 
   renderCreateTodoInput() {
     return (
-      <Grid.Row>
-        <Grid.Column width={16}>
-          <Input
-            action={{
-              color: 'teal',
-              labelPosition: 'left',
-              icon: 'add',
-              content: 'New task',
-              onClick: this.onTodoCreate
-            }}
-            fluid
-            actionPosition="left"
-            placeholder="To change the world..."
-            onChange={this.handleNameChange}
-          />
-        </Grid.Column>
-        <Grid.Column width={16}>
-          <Divider />
-        </Grid.Column>
-      </Grid.Row>
+      <Grid columns={2} celled>
+        <Grid.Row>
+          <Grid.Column width={8}>
+            <Input id="name"
+              action={{
+                color: 'teal',
+                labelPosition: 'left',
+                icon: 'add',
+                content: 'New task',
+                onClick: this.onTodoCreate
+              }}
+              fluid
+              actionPosition="left"
+              placeholder="To change the world..."
+              onChange={this.handleNameChange}
+            />
+          </Grid.Column>
+          <Grid.Column width={8}>
+            <Input id="date"
+              fluid
+              placeholder="YYYY-MM-DD"
+              onChange={this.handleDateChange}
+            />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 
