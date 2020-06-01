@@ -9,7 +9,7 @@ This application will allow creating/removing/updating/fetching TODO items. Each
 # Components
 ```
 Client: React
-BackEnd: AWS Lambda, API Gateway, S3 Bucket, DynamoDB
+Backend: AWS Lambda, API Gateway, S3 Bucket, DynamoDB
 ```
 # Run the project
 
