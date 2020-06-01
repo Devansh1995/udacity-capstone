@@ -60,10 +60,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         }
         dueDate = this.state.newDueDate
       }
-
-      if(this.state.newTodoName === '') {
-        throw new Error('No name.')
-      }      
+     
       const newTodo = await createTodo(this.props.auth.getIdToken(), {
         name: this.state.newTodoName,
         dueDate
@@ -73,7 +70,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         newTodoName: ''
       })
     } catch(err) {
-      alert('Todo creation failed: ' + err.message)
+      alert('Todo creation failed. ' + err.message)
     }
   }
 
